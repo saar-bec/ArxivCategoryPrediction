@@ -6,7 +6,6 @@ Classification.py
 import os
 import json
 import gzip
-import json
 import numpy as np
 from datetime import datetime
 from sklearn.linear_model import LogisticRegression, SGDClassifier
@@ -18,6 +17,13 @@ from arxiv_public_data.oai_metadata import load_metadata
 
 logger = LOGGER.getChild('lr-classify')
 
+
+extract_data = ['id', 'authors', 'authors_parsed', 'title', 'abstract', 'categories']
+categories = ['cs', 'econ', 'eess', 'math', 'stat', 'q-bio', 'q-fin',
+              'astro-ph', 'cond-mat', 'gr-qc', 'hep-ex', 'hep-lat', 'hep-ph', 'hep-th', 'nlin', 'nucl-ex', 'nucl-th','physics', 'quant-ph']
+
+with open(r'/ArxivCategoryPrediction/data\arxiv-metadata-oai-snapshot.json') as f:
+    d = json.load(f)
 
 def loaddata(fname='data/internal-references.json.gz'):
     return json.load(gzip.open(fname, 'r'))
@@ -105,26 +111,19 @@ if __name__ == "__main__":
                         verbose=False, n_jobs=6)
     results = {}
 
-    # JUST cocitation features
-    logger.info('Fitting cocitation vectors')
-    lr = SGDClassifier(**model_kwargs)
-    results['cocitation'] = train_test(lr, mc_train, target_train,
-                                       mc_test, target_test)
-    logger.info(results['cocitation'])
-    logger.info('cocitation vectors done!')
 
-    # JUST full text
-    fulltext_vec = fill_zeros(load_embeddings(usel_fulltext, headers=2))
-    shuffle(fulltext_vec)
-    fulltext_train = fulltext_vec[:train_size]
-    fulltext_test = fulltext_vec[train_size:]
-
-    logger.info('Fitting fulltext vectors')
-    lr = SGDClassifier(**model_kwargs)
-    results['fulltext'] = train_test(lr, fulltext_train, target_train,
-                                     fulltext_test, target_test)
-    logger.info(results['fulltext'])
-    logger.info('fulltext vectors done!')
+    # # JUST full text
+    # fulltext_vec = fill_zeros(load_embeddings(usel_fulltext, headers=2))
+    # shuffle(fulltext_vec)
+    # fulltext_train = fulltext_vec[:train_size]
+    # fulltext_test = fulltext_vec[train_size:]
+    #
+    # logger.info('Fitting fulltext vectors')
+    # lr = SGDClassifier(**model_kwargs)
+    # results['fulltext'] = train_test(lr, fulltext_train, target_train,
+    #                                  fulltext_test, target_test)
+    # logger.info(results['fulltext'])
+    # logger.info('fulltext vectors done!')
 
     # JUST titles
     title_vec = load_embeddings(usel_title)['embeddings']
@@ -158,11 +157,11 @@ if __name__ == "__main__":
     results['all'] = train_test(
         lr,
         np.concatenate(
-            [title_train, abstract_train, mc_train, fulltext_train], axis=1
+            [title_train, abstract_train, mc_train], axis=1
         ),
         target_train,
         np.concatenate(
-            [title_test, abstract_test, mc_test, fulltext_test], axis=1
+            [title_test, abstract_test, mc_test], axis=1
         ),
         target_test
     )
@@ -179,11 +178,11 @@ if __name__ == "__main__":
     results['all - titles'] = train_test(
         lr,
         np.concatenate(
-            [abstract_train, mc_train, fulltext_train], axis=1
+            [abstract_train, mc_train], axis=1
         ),
         target_train,
         np.concatenate(
-            [abstract_test, mc_test, fulltext_test], axis=1
+            [abstract_test, mc_test], axis=1
         ),
         target_test
     )
@@ -196,50 +195,17 @@ if __name__ == "__main__":
     results['all - abstracts'] = train_test(
         lr,
         np.concatenate(
-            [title_train, mc_train, fulltext_train], axis=1
+            [title_train, mc_train], axis=1
         ),
         target_train,
         np.concatenate(
-            [title_test, mc_test, fulltext_test], axis=1
+            [title_test, mc_test], axis=1
         ),
         target_test
     )
     logger.info(results['all - abstracts'])
     logger.info('all - abstracts done!')
 
-    # ALL - cocitation
-    logger.info('Fitting all - cocitation')
-    lr = SGDClassifier(**model_kwargs)
-    results['all - cocitation'] = train_test(
-        lr,
-        np.concatenate(
-            [title_train, abstract_train, fulltext_train], axis=1
-        ),
-        target_train,
-        np.concatenate(
-            [title_test, abstract_test, fulltext_test], axis=1
-        ),
-        target_test
-    )
-    logger.info(results['all - cocitation'])
-    logger.info('all - cocitation done!')
-
-    # ALL - fulltext
-    logger.info('Fitting all features')
-    lr = SGDClassifier(**model_kwargs)
-    results['all - fulltext'] = train_test(
-        lr,
-        np.concatenate(
-            [title_train, abstract_train, mc_train], axis=1
-        ),
-        target_train,
-        np.concatenate(
-            [title_test, abstract_test, mc_test], axis=1
-        ),
-        target_test
-    )
-    logger.info(results['all - fulltext'])
-    logger.info('all - fulltext done!')
 
     # SAVE
     nowdate = str(datetime.now()).split()[0]
