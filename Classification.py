@@ -20,7 +20,7 @@ logger = LOGGER.getChild('lr-classify')
 
 extract_data = ['id', 'authors', 'authors_parsed', 'title', 'abstract', 'categories']
 categories = ['cs', 'econ', 'eess', 'math', 'stat', 'q-bio', 'q-fin',
-              'astro-ph', 'cond-mat', 'gr-qc', 'hep-ex', 'hep-lat', 'hep-ph', 'hep-th', 'nlin', 'nucl-ex', 'nucl-th','physics', 'quant-ph']
+              'astro-ph', 'cond-mat', 'gr-qc', 'hep-ex', 'hep-lat', 'hep-ph', 'hep-th', 'nlin', 'nucl-ex', 'nucl-th','physics', 'quant-ph', 'math-ph']
 
 with open(r'/ArxivCategoryPrediction/data\arxiv-metadata-oai-snapshot.json') as f:
     d = json.load(f)

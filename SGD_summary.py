@@ -10,8 +10,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import SGDClassifier
 
-df = pd.read_csv('df_all.csv')
-summary_embeddings = np.load('summary_embeddings.npy')
+df = pd.read_csv(r'C:\Users\saarb\Desktop\courses\1MA\third_year\project_in_data_mining\ArxivCategoryPrediction\data\df_all.csv')
+summary_embeddings = np.load(r'C:\Users\saarb\Desktop\courses\1MA\third_year\project_in_data_mining\ArxivCategoryPrediction\data\summary_embeddings.npy')
+
+df['primary_category'] = df['primary_category'].apply(lambda x: x.split('.')[0])
+df['primary_category'] = df['primary_category'].replace({i: 'ph' for i in ['astro-ph', 'cond-mat', 'gr-qc', 'hep-ex', 'hep-lat', 'hep-ph', 'hep-th', 'nlin', 'nucl-ex', 'nucl-th','physics', 'quant-ph', 'math-ph']})
+
 
 # Keep only categories with at least 2 samples
 category_counts = df['primary_category'].value_counts()
@@ -25,6 +29,8 @@ filtered_categories = df['primary_category'][valid_df]
 # Now encode and split
 label_encoder = LabelEncoder()
 y = label_encoder.fit_transform(filtered_categories)
+mapping_dict = {index: label for index, label in enumerate(label_encoder.classes_)}
+
 
 x_train, x_test, y_train, y_test = train_test_split(
     filtered_embeddings,
@@ -42,7 +48,7 @@ clf = SGDClassifier(
     n_jobs=-1,
     fit_intercept=False
 )
-
+losses=['hinge', 'log_loss', 'modified_huber', 'squared_hinge', 'perceptron', 'squared_error', 'huber', 'epsilon_insensitive', 'squared_epsilon_insensitive']
 # Train model
 clf.fit(x_train, y_train)
 
@@ -51,7 +57,8 @@ y_pred = clf.predict(x_test)
 
 # accuracy
 print(clf.score(x_test, y_test))
-
+conf_mat = pd.crosstab(y_test, y_pred, rownames=['Actual'], colnames=['Predicted'], margins=True)
+conf_mat.replace(mapping_dict, inplace=True)
 
 
 ##### ConfusionMatrix
@@ -62,8 +69,7 @@ import matplotlib.pyplot as plt
 cm = confusion_matrix(y_test, y_pred)
 
 # Create a confusion matrix display
-disp = ConfusionMatrixDisplay(confusion_matrix=cm,
-                             display_labels=['Other', 'hep-ph'])  # Since we made it binary
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=mapping_dict.keys())  # Since we made it binary
 
 
 ConfusionMatrixDisplay.from_estimator(clf, X_test, y_test)
