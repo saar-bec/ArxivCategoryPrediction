@@ -10,11 +10,23 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import SGDClassifier
 
-df = pd.read_csv(r'C:\Users\saarb\Desktop\courses\1MA\third_year\project_in_data_mining\ArxivCategoryPrediction\data\df_all.csv')
+df = pd.read_parquet(r'C:\Users\saarb\Desktop\courses\1MA\third_year\project_in_data_mining\ArxivCategoryPrediction\data\arxiv_data.parquet')#read_csv(r'C:\Users\saarb\Desktop\courses\1MA\third_year\project_in_data_mining\ArxivCategoryPrediction\data\df_all.csv')
 summary_embeddings = np.load(r'C:\Users\saarb\Desktop\courses\1MA\third_year\project_in_data_mining\ArxivCategoryPrediction\data\summary_embeddings.npy')
 
+
+df['primary_category'] = df['categories'].apply(lambda x: x.split(' ')[0])  # Take the first category if multiple are present
 df['primary_category'] = df['primary_category'].apply(lambda x: x.split('.')[0])
-df['primary_category'] = df['primary_category'].replace({i: 'ph' for i in ['astro-ph', 'cond-mat', 'gr-qc', 'hep-ex', 'hep-lat', 'hep-ph', 'hep-th', 'nlin', 'nucl-ex', 'nucl-th','physics', 'quant-ph', 'math-ph']})
+df['primary_category'] = df['primary_category'].replace({i: 'ph' for i in ['astro-ph', 'cond-mat', 'gr-qc', 'hep-ex',
+                                                                           'hep-lat', 'hep-ph', 'hep-th', 'nlin',
+                                                                           'nucl-ex', 'nucl-th', 'physics', 'quant-ph',
+                                                                           'math-ph', 'acc-phys', 'adap-org', 'ao-sci',
+                                                                           'atom-ph', 'bayes-an', 'chao-dyn', 'chem-ph',
+                                                                           'comp-gas', 'mtrl-th', 'patt-sol', 'plasm-ph',
+                                                                           'solv-int', 'supr-con']})
+df['primary_category'] = df['primary_category'].replace({i: 'math' for i in ['alg-geom', 'dg-ga', 'q-alg']})
+df['primary_category'] = df['primary_category'].replace({i: 'cs' for i in ['cmp-lg']})
+df['primary_category'] = df['primary_category'].replace({i: 'q-fin' for i in ['funct-an']})
+
 
 
 # Keep only categories with at least 2 samples

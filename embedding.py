@@ -45,7 +45,7 @@ def create_embeddings_for_column(column_data):
 
 # Create embeddings for each column
 title_embeddings = create_embeddings_for_column(df['title'])
-summary_embeddings = create_embeddings_for_column(df['summary'])
+summary_embeddings = create_embeddings_for_column(df['abstract'])#'summary'
 authors_embeddings = create_embeddings_for_column(df['authors'])
 
 
