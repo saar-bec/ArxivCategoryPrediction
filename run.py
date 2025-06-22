@@ -5,8 +5,8 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import SGDClassifier
 import tensorflow_hub as hub
 
-df = pd.read_parquet('/sci/labs/orzuk/orzuk/teaching/big_data_project_52017/Tom_Saar/arxiv_data.parquet')
-
+df = pd.read_parquet(r'C:\Users\saarb\Desktop\courses\1MA\third_year\project_in_data_mining\ArxivCategoryPrediction\arxiv_data\arxiv_data.parquet') # '/sci/labs/orzuk/orzuk/teaching/big_data_project_52017/Tom_Saar/arxiv_data.parquet')
+# df = df.iloc[0:100000]
 df['primary_category'] = df['categories'].apply(lambda x: x.split(' ')[0])  # Take the first category if multiple are present
 df['primary_category'] = df['primary_category'].apply(lambda x: x.split('.')[0])
 df['primary_category'] = df['primary_category'].replace({i: 'ph' for i in ['astro-ph', 'cond-mat', 'gr-qc', 'hep-ex',
@@ -43,9 +43,9 @@ except:
         return np.array(embeddings)
 
     # Create embeddings for each column
-    title_embeddings = create_embeddings_for_column(df['title'])
-    summary_embeddings = create_embeddings_for_column(df['abstract']) # 'summary'
-    authors_embeddings = create_embeddings_for_column(df['authors'])
+    title_embeddings = create_embeddings_for_column(df['title']) # [embed([strings]) for strings in df['title']] #
+    summary_embeddings = create_embeddings_for_column(df['abstract']) # 'summary' # [embed([strings]) for strings in df['abstract']] #
+    authors_embeddings = create_embeddings_for_column(df['authors']) # [embed([strings]) for strings in df['authors']] #
 
     # Create column names for each embedding type
     title_cols = [f'title_emb_{i}' for i in range(title_embeddings.shape[1])]
