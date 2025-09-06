@@ -15,6 +15,10 @@ confusion_mat = pd.crosstab(res['y_test'], res['y_pred'], rownames=['Actual'], c
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
 
 # Example transition matrix
 transition_matrix = confusion_mat
@@ -30,3 +34,52 @@ plt.title('Transition Matrix Heatmap')
 plt.xlabel('Predicted')
 plt.ylabel('Actual')
 plt.show()
+
+
+
+
+# accuracy
+
+accuracy = accuracy_score(res['y_test'], res['y_pred'])
+y_test = res["y_test"]
+y_pred = res["y_pred"]
+
+
+# precision and recall per category
+mapping_dict = {
+    0: "Computer Science",
+    1: "Economics",
+    2: "Electrical Engineering and Systems Science",
+    3: "Mathematics",
+    4: "Physics",
+    5: "Quantitative Biology",
+    6: "Quantitative Finance",
+    7: "Statistics"
+}
+
+precision_per_cat = precision_score(y_test, y_pred, average=None)
+recall_per_cat = recall_score(y_test, y_pred, average=None)
+
+# Create a DataFrame with readable class names
+class_names = [mapping_dict[i] for i in range(len(precision_per_cat))]
+
+metrics_df = pd.DataFrame({
+    'Category': class_names,
+    'Precision': precision_per_cat,
+    'Recall': recall_per_cat
+})
+
+metrics_df = metrics_df.round(4)
+
+#f1 score
+macro_f1 = f1_score(y_test, y_pred, average='macro')
+
+micro_f1 = f1_score(y_test, y_pred, average='micro')
+
+#baseline_accuracy
+most_frequent_class = np.bincount(y_test).argmax() # most frequent category in y_test
+baseline_predictions = np.full_like(y_test, fill_value=most_frequent_class) # prediction array where every prediction is the most frequent class
+baseline_accuracy = accuracy_score(y_test, baseline_predictions)
+
+
+
