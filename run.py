@@ -4,6 +4,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import SGDClassifier
 import tensorflow_hub as hub
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
 
 
 df = pd.read_csv(r'/sci/labs/orzuk/orzuk/teaching/big_data_project_52017/Tom_Saar/arxiv_data/arxiv_data.csv')
@@ -110,6 +114,52 @@ print(clf.score(x_test, y_test))
 conf_mat = pd.crosstab(y_test, y_pred, rownames=['Actual'], colnames=['Predicted'], margins=True)
 conf_mat.replace(mapping_dict, inplace=True)
 
+
+# accuracy
+accuracy = accuracy_score(df['y_test'], df['y_pred'])
+print(f"Accuracy: {accuracy}")
+
+
+# precision and recall per category
+mapping_dict = {
+    0: "Computer Science",
+    1: "Economics",
+    2: "Electrical Engineering and Systems Science",
+    3: "Mathematics",
+    4: "Physics",
+    5: "Quantitative Biology",
+    6: "Quantitative Finance",
+    7: "Statistics"
+}
+
+precision_per_cat = precision_score(y_test, y_pred, average=None)
+recall_per_cat = recall_score(y_test, y_pred, average=None)
+
+# Create a DataFrame with readable class names
+class_names = [mapping_dict[i] for i in range(len(precision_per_cat))]
+
+metrics_df = pd.DataFrame({
+    'Category': class_names,
+    'Precision': precision_per_cat,
+    'Recall': recall_per_cat
+})
+
+metrics_df = metrics_df.round(4)
+
+print(metrics_df)
+
+#f1 score
+macro_f1 = f1_score(y_test, y_pred, average='macro')
+print("Macro F1 Score:", round(macro_f1, 4))
+
+micro_f1 = f1_score(y_test, y_pred, average='micro')
+print("Micro F1 Score:", round(micro_f1, 4))
+
+#baseline_accuracy
+most_frequent_class = np.bincount(y_test).argmax() # most frequent category in y_test
+baseline_predictions = np.full_like(y_test, fill_value=most_frequent_class) # prediction array where every prediction is the most frequent class
+baseline_accuracy = accuracy_score(y_test, baseline_predictions)
+print("Baseline Accuracy (Most Frequent Class):", round(baseline_accuracy, 4))
 
 
 
